@@ -87,11 +87,11 @@ function App() {
     <div className="min-h-screen bg-[#C8F8F6] p-6 text-gray-900">
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">My Storage	</h1>
+          <h1 className="text-3xl font-semibold">My Storage	</h1>
           <div className="flex items-center gap-2">
             <span>Storage: {formatFileSize(calculateTotalStorage(directoryItems))}</span>
             <div className="w-8 h-8 bg-[#00AEFF] text-white rounded-full flex items-center justify-center font-bold">
-              U
+              S
             </div>
           </div>
         </div>
@@ -166,21 +166,21 @@ function App() {
               <div className="col-span-3 flex justify-center gap-2">
                 <button
                   onClick={() => renameFile(item.name || item)}
-                  className="bg-[#42EAFF] text-gray-900 px-4 py-2  rounded hover:bg-[#2ac9dc] flex items-center gap-1"
+                  className="bg-[#42EAFF] text-gray-900 px-4 py-2  rounded hover:bg-[#2ac9dc] flex items-center gap-1 cursor-pointer"
                   title="Rename"
                 >
                   <Pencil2Icon />
                 </button>
                 <button
                   onClick={() => saveFile(item.name || item)}
-                  className="bg-[#00AEFF] text-white px-4 py-2 rounded hover:bg-[#0095dd] flex items-center gap-1"
+                  className="bg-[#00AEFF] text-white px-4 py-2 rounded hover:bg-[#0095dd] flex items-center gap-1 cursor-pointer"
                   title="Save"
                 >
                   <CheckIcon />
                 </button>
                 <button
                   onClick={() => handleDelete(item.name || item)}
-                  className="bg-[#00AEFF] text-white px-4 py-2 rounded hover:bg-[#0095dd] flex items-center gap-1"
+                  className="bg-[#00AEFF] text-white px-4 py-2 rounded hover:bg-[#0095dd] flex items-center gap-1 cursor-pointer"
                   title="Delete"
                 >
                   <TrashIcon />

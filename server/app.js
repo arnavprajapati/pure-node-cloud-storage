@@ -36,44 +36,74 @@ const server = http.createServer(async (req, res) => {
     // console.log(queryParam);
 
     if (req.method === 'GET') {
-        if (req.url === '/favicon.ico') return "No Favicon"
+        if (req.url === '/favicon.ico') return res.end("No Favicon");
+
         if (req.url === '/') {
-            serverDirectory(url, res)
+            serverDirectory(url, res);
         } else {
             try {
-                const readFile = await open(`./storage${decodeURIComponent(url)}`)
-                const fileStats = await readFile.stat()
+                const filePath = `./storage${decodeURIComponent(url)}`;
+                const fileHandle = await open(filePath);
+                const fileStats = await fileHandle.stat();
+
                 if (fileStats.isDirectory()) {
-                    await readFile.close()
-                    await serverDirectory(url, res)
-                } else {
-
-                    const readStream = readFile.createReadStream()
-                    const contentType = mime.contentType(url.slice(1))
-                    console.log(contentType);
-
-                    res.setHeader('Content-Type', 'contentType')
-                    res.setHeader('Content-Length', fileStats.size)
-
-                    if (queryParam.action === 'download') {
-                        res.setHeader('Content-Disposition', `attachment; filename="${url.slice(1)}"`)
-                    } else if (queryParam.action === 'open') {
-                        res.setHeader('Content-Disposition', "inline")
-                    }
-
-                    readStream.pipe(res)
-
-                    readStream.on('end', async () => {
-                        await readFile.close()
-                    })
-
+                    await fileHandle.close();
+                    return serverDirectory(url, res);
                 }
+
+                const contentType = mime.contentType(url.slice(1))
+                const range = req.headers.range;
+                let start = 0;
+                let end = fileStats.size - 1;
+
+                if (range) {
+                    const [startStr, endStr] = range.replace(/bytes=/, "").split("-");
+                    start = parseInt(startStr, 10);
+                    if (endStr) end = parseInt(endStr, 10);
+
+                    res.writeHead(206, {
+                        'Content-Range': `bytes ${start}-${end}/${fileStats.size}`,
+                        'Accept-Ranges': 'bytes',
+                        'Content-Length': end - start + 1,
+                        'Content-Type': contentType
+                    });
+                } else {
+                    res.writeHead(200, {
+                        'Content-Length': fileStats.size,
+                        'Content-Type': contentType,
+                        'Accept-Ranges': 'bytes'
+                    });
+                }
+
+                if (queryParam.action === 'download') {
+                    res.setHeader('Content-Disposition', `attachment; filename="${path.basename(url)}"`);
+                } else if (queryParam.action === 'open') {
+                    res.setHeader('Content-Disposition', 'inline');
+                }
+
+                const readStream = fileHandle.createReadStream({ start, end });
+
+                readStream.pipe(res);
+
+                readStream.on('end', async () => {
+                    await fileHandle.close(); // ✅ prevent warning
+                });
+
+                readStream.on('error', async (err) => {
+                    console.error("Stream error:", err);
+                    await fileHandle.close(); // ✅ close on error too
+                    res.statusCode = 500;
+                    res.end("Stream error");
+                });
+
             } catch (err) {
-                console.log(err.message);
-                res.end("Server not reached")
+                console.log("GET error:", err.message);
+                res.statusCode = 500;
+                res.end("Server error");
             }
         }
     }
+
 
     else if (req.method === 'POST') {
         const writeStream = createWriteStream(`./storage/${req.headers.filename}`);
