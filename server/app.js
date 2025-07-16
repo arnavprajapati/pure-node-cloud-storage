@@ -1,5 +1,5 @@
 import { createWriteStream } from 'fs'
-import { open, readdir, readFile, rm } from 'fs/promises'
+import { open, readdir, readFile, rename, rm } from 'fs/promises'
 import http from 'http'
 import mime from 'mime-types'
 
@@ -117,6 +117,25 @@ const server = http.createServer(async (req, res) => {
             }
         })
     }
+
+    else if (req.method === 'PATCH') {
+        req.on('data', async (chunk) => {
+            const data = JSON.parse(chunk.toString())
+
+            const oldPath = `./storage/${data.oldFileName}`;
+            const newPath = `./storage/${data.newFileName}`;
+
+            if (!data.newFileName || data.newFileName.includes('/')) {
+                throw new Error('Invalid new file name');
+            }
+
+            await rename(oldPath, newPath);
+
+            console.log(data);
+            res.end("rename successfully")
+        })
+    }
+
 })
 
 async function serverDirectory(url, res) {

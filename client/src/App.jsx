@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 function App() {
   const [directoryItems, setDirectoryItems] = useState([]);
   const [progress, setProgress] = useState(0)
+  const [newFileName, setNewFileName] = useState("")
+
 
 
   async function getDirectoryItems() {
@@ -39,6 +41,27 @@ function App() {
     getDirectoryItems()
   }
 
+  async function renameFile(oldFileName) {
+    console.log({ oldFileName, newFileName });
+    setNewFileName(oldFileName)
+  }
+
+  async function saveFile(oldFileName) {
+
+    setNewFileName(oldFileName)
+    console.log({ oldFileName, newFileName });
+
+    const response = await fetch('http://192.168.21.114/', {
+      method: "PATCH",
+      body: JSON.stringify({ oldFileName, newFileName })
+    })
+    const data = await response.text()
+    console.log(data);
+    getDirectoryItems()
+    setNewFileName("")
+
+  }
+
   useEffect(() => {
     getDirectoryItems();
   }, []);
@@ -50,6 +73,9 @@ function App() {
       <input type="file" onChange={(e) => {
         onHandleChange(e);
       }} />
+      <input type="text" onChange={(e) =>
+        setNewFileName(e.target.value)
+      } value={newFileName} />
       <p>Progress: {progress}</p>
       <div className="space-y-2">
         {directoryItems.map((items, i) => (
@@ -61,7 +87,12 @@ function App() {
             <a href={`http://192.168.21.114/${items}?action=download`} className="text-blue-600">
               Download
             </a>
-            
+            <button onClick={() => {
+              renameFile(items)
+            }}>Rename</button>
+            <button onClick={() => {
+              saveFile(items)
+            }}>Save</button>
             <button onClick={() => {
               handleDelete(items)
             }}>Delete</button>
