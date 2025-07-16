@@ -1,7 +1,8 @@
 import { createWriteStream } from 'fs'
-import { open, readdir, readFile, rename, rm } from 'fs/promises'
+import { open, readdir, readFile, rename, rm, stat } from 'fs/promises'
 import http from 'http'
 import mime from 'mime-types'
+import path from 'path'
 
 const PORT = 80
 const Hostname = '0.0.0.0'
@@ -13,6 +14,7 @@ const server = http.createServer(async (req, res) => {
     res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Filename, Content-Type");
     res.setHeader("Access-Control-Allow-Methods", "*");
+    res.setHeader("Access-Control-Allow-Headers", "*")
 
     const data = decodeURIComponent(req.url).split('?')
     const [url, queryString] = data
@@ -125,10 +127,6 @@ const server = http.createServer(async (req, res) => {
             const oldPath = `./storage/${data.oldFileName}`;
             const newPath = `./storage/${data.newFileName}`;
 
-            if (!data.newFileName || data.newFileName.includes('/')) {
-                throw new Error('Invalid new file name');
-            }
-
             await rename(oldPath, newPath);
 
             console.log(data);
@@ -139,10 +137,22 @@ const server = http.createServer(async (req, res) => {
 })
 
 async function serverDirectory(url, res) {
-    const itemList = await readdir(`./storage${url}`)
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Content-Type', 'application/json')
-    res.end(JSON.stringify(itemList));
+    const fileList = await readdir(`./storage${url}`);
+
+    const fileInfoList = [];
+
+    for (const file of fileList) {
+    const fileStats = await stat(`./storage${url}/${file}`);
+    fileInfoList.push({
+        name: file,
+        size: fileStats.size,
+        type: path.extname(file).slice(1).toUpperCase() || 'UNKNOWN'
+    });
+    }
+    console.log(fileInfoList);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(fileInfoList)); // [{ name, size, type }]
 }
 
 server.listen(PORT, Hostname, () => {
