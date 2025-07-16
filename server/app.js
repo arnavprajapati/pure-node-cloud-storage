@@ -1,5 +1,5 @@
 import { createWriteStream } from 'fs'
-import { open, readdir, readFile } from 'fs/promises'
+import { open, readdir, readFile, rm } from 'fs/promises'
 import http from 'http'
 import mime from 'mime-types'
 
@@ -12,6 +12,7 @@ const server = http.createServer(async (req, res) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Filename");
     res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Filename, Content-Type");
+    res.setHeader("Access-Control-Allow-Methods", "*");
 
     const data = decodeURIComponent(req.url).split('?')
     const [url, queryString] = data
@@ -104,6 +105,18 @@ const server = http.createServer(async (req, res) => {
         // });
     }
 
+    else if (req.method === 'DELETE') {
+        req.on('data', async (chunk) => {
+            const fileName = chunk.toString()
+            console.log(fileName);
+            try {
+                await rm(`./storage/${fileName}`)
+                res.end('file deleted successfuly')
+            } catch (err) {
+                console.log(err.message);
+            }
+        })
+    }
 })
 
 async function serverDirectory(url, res) {

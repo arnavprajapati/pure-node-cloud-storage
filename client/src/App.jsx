@@ -29,6 +29,16 @@ function App() {
     xhr.send(file)
   }
 
+  async function handleDelete(fileName) {
+    const response = await fetch('http://192.168.21.114/', {
+      method: "DELETE",
+      body: fileName
+    })
+    const data = await response.text()
+    console.log(data);
+    getDirectoryItems()
+  }
+
   useEffect(() => {
     getDirectoryItems();
   }, []);
@@ -51,6 +61,11 @@ function App() {
             <a href={`http://192.168.21.114/${items}?action=download`} className="text-blue-600">
               Download
             </a>
+            
+            <button onClick={() => {
+              handleDelete(items)
+            }}>Delete</button>
+            <br />
           </div>
         ))}
       </div>
