@@ -63,9 +63,10 @@ const server = http.createServer(async (req, res) => {
 
                     readStream.pipe(res)
 
-                    readStream.on('close', async () => {
+                    readStream.on('end', async () => {
                         await readFile.close()
                     })
+
                 }
             } catch (err) {
                 console.log(err.message);
@@ -142,12 +143,12 @@ async function serverDirectory(url, res) {
     const fileInfoList = [];
 
     for (const file of fileList) {
-    const fileStats = await stat(`./storage${url}/${file}`);
-    fileInfoList.push({
-        name: file,
-        size: fileStats.size,
-        type: path.extname(file).slice(1).toUpperCase() || 'UNKNOWN'
-    });
+        const fileStats = await stat(`./storage${url}/${file}`);
+        fileInfoList.push({
+            name: file,
+            size: fileStats.size,
+            type: path.extname(file).slice(1).toUpperCase() || 'UNKNOWN'
+        });
     }
     console.log(fileInfoList);
     res.setHeader('Access-Control-Allow-Origin', '*');
