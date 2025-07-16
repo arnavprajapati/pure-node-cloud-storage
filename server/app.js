@@ -14,6 +14,8 @@ const server = http.createServer(async (req, res) => {
     res.setHeader("Access-Control-Allow-Headers", "Filename, Content-Type");
     res.setHeader("Access-Control-Allow-Methods", "*");
     res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Content-Type", "contentType");
+
 
     const data = decodeURIComponent(req.url).split("?");
     const [url, queryString] = data;
