@@ -60,18 +60,9 @@ const server = http.createServer(async (req, res) => {
 
 async function serverDirectory(url, res){
     const itemList = await readdir(`./storage${url}`)
-        let dynamicHTML = ''
-        itemList.forEach((elem) => {
-            dynamicHTML += `
-                <a>${elem}</a>
-                <a href=".${url === "/" ? "" : url}/${elem}?action=open">Open</a>
-                <a href=".${url === "/" ? "" : url}/${elem}?action=download">Download</a><br>
-            `
-        })
-        const boilerHTML = await readFile('./index.html', 'utf-8')
-        res.end(`
-            ${boilerHTML.replace('${dynamicHTML}', dynamicHTML)}
-        `)
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(itemList));
 }
 
 server.listen(PORT, Hostname, () => {
