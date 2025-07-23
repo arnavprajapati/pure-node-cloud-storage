@@ -2,7 +2,7 @@ import http from "http";
 import mime from "mime-types";
 import supabase from "./supabase.js";
 
-const PORT = 80;
+const PORT = process.env.PORT || 4000;
 const Hostname = "0.0.0.0";
 
 const server = http.createServer(async (req, res) => {
@@ -24,7 +24,6 @@ const server = http.createServer(async (req, res) => {
         return res.end();
     }
 
-    // 🔍 GET: List files
     if (req.method === "GET") {
         const { data, error } = await supabase.storage.from("uploads").list("", {
             limit: 100,
@@ -45,10 +44,7 @@ const server = http.createServer(async (req, res) => {
 
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify(fileList));
-    }
-
-    // 🆙 POST: Upload file
-    else if (req.method === "POST") {
+    }else if (req.method === "POST") {
         const filename = req.headers.filename;
         const chunks = [];
 
@@ -69,10 +65,7 @@ const server = http.createServer(async (req, res) => {
 
             res.end("Upload successful");
         });
-    }
-
-    // ❌ DELETE: Delete file
-    else if (req.method === "DELETE") {
+    }else if (req.method === "DELETE") {
         req.on("data", async (chunk) => {
             const fileName = chunk.toString();
             const { error } = await supabase.storage.from("uploads").remove([fileName]);
@@ -84,10 +77,7 @@ const server = http.createServer(async (req, res) => {
 
             res.end("File deleted successfully");
         });
-    }
-
-    // ✏️ PATCH: Rename file
-    else if (req.method === "PATCH") {
+    }else if (req.method === "PATCH") {
         req.on("data", async (chunk) => {
             const { oldFileName, newFileName } = JSON.parse(chunk.toString());
             const { error } = await supabase.storage
@@ -105,5 +95,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, Hostname, () => {
-    console.log(`✅ Server started at http://${Hostname}:${PORT}`);
+    console.log(`✅ Server started on port ${PORT}`);
 });
