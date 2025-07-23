@@ -25,7 +25,7 @@ function App() {
 
 
   async function getDirectoryItems() {
-    const response = await fetch("http://192.168.21.114/");
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/`);
     const data = await response.json();
     setDirectoryItems(data);
   }
@@ -41,7 +41,7 @@ function App() {
   async function onHandleChange(e) {
     const file = e.target.files[0];
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://192.168.21.114", true);
+    xhr.open("POST", `${import.meta.env.VITE_API_URL}/`, true);
     xhr.setRequestHeader("filename", file.name);
     setShowProgress(true);
     xhr.upload.addEventListener("progress", (e) => {
@@ -59,7 +59,7 @@ function App() {
   }
 
   async function handleDelete(fileName) {
-    await fetch("http://192.168.21.114/", {
+    await fetch(`${import.meta.env.VITE_API_URL}/`, {
       method: "DELETE",
       body: fileName,
     });
@@ -71,7 +71,7 @@ function App() {
   }
 
   async function saveFile(oldFileName) {
-    await fetch("http://192.168.21.114/", {
+    await fetch(`${import.meta.env.VITE_API_URL}/`, {
       method: "PATCH",
       body: JSON.stringify({ oldFileName, newFileName }),
     });
@@ -151,13 +151,13 @@ function App() {
               </div>
               <div className="col-span-3 ml-3 flex justify-center gap-2">
                 <a
-                  href={`http://192.168.21.114/${item.name || item}?action=open`}
+                  href={`${import.meta.env.VITE_API_URL}/${item.name || item}?action=open`}
                   className="flex items-center gap-1 px-3 py-1 bg-white border border-[#00AEFF] text-[#00AEFF] rounded hover:bg-[#f0faff] font-medium transition"
                 >
                   <EyeOpenIcon /> Open
                 </a>
                 <a
-                  href={`http://192.168.21.114/${item.name || item}?action=download`}
+                  href={`${import.meta.env.VITE_API_URL}/${item.name || item}?action=download`}
                   className="flex items-center gap-1 px-3 py-1 bg-white border border-[#00AEFF] text-[#00AEFF] rounded hover:bg-[#f0faff] font-medium transition"
                 >
                   <DownloadIcon /> Download
